@@ -52,7 +52,6 @@ namespace lp {
       std::stringstream &getStream(enum streamType stream) noexcept;
       void onRead(enum streamType stream, const std::function<void(Process &process, std::stringstream &stream)> &callback) noexcept;
       void redirectStream(enum streamType stream, bool does_redirect) noexcept;
-      bool isRedirecting(int fd) const noexcept;
       std::string _cmd;
       std::string _workingDirectory;
       std::stringstream _streams[2];

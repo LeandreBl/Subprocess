@@ -37,19 +37,19 @@ namespace lp {
     if (getPath(_parsedArgs[0], exePath) == -1)
       return -1;
     for (uint8_t i = Stdin; i <= Stderr; ++i)
-      if (isRedirecting(i) && pipe2(_pipes[i], O_CLOEXEC | O_NONBLOCK) == -1)
+      if (isRedirecting(static_cast<enum streamType>(i)) && pipe2(_pipes[i], O_CLOEXEC | O_NONBLOCK) == -1)
         return -1;
     if (isRedirecting(Stdin))
       std::swap(_pipes[Stdin][0], _pipes[Stdin][1]);
     _pid = fork();
     if (_pid != 0) {
       for (uint8_t i = Stdin; i <= Stderr; ++i)
-        if (isRedirecting(i) && close(_pipes[i][1]) == -1)
+        if (isRedirecting(static_cast<enum streamType>(i)) && close(_pipes[i][1]) == -1)
           return -1;
       return _pid == -1 ? -1 : 0;
     }
     for (uint8_t i = Stdin; i <= Stderr; ++i) {
-      if (isRedirecting(i) && (dup2(_pipes[i][1], i) == -1 || close(_pipes[i][0]) == -1))
+      if (isRedirecting(static_cast<enum streamType>(i)) && (dup2(_pipes[i][1], i) == -1 || close(_pipes[i][0]) == -1))
         exit(EXIT_FAILURE);
     }
     if (chdir(_workingDirectory.c_str()))

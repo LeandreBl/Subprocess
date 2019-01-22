@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <cstring>
 
 #include "Process.hpp"
 

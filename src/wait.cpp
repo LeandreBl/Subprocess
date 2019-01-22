@@ -74,7 +74,7 @@ namespace lp {
     else
       ret = waitWithoutCallbacks();
     for (uint8_t i = Stdout; i <= Stderr; ++i)
-      if (isRedirecting(i) && _callbacks[i - 1])
+      if (isRedirecting(static_cast<enum streamType>(i)) && _callbacks[i - 1])
         pollStream(static_cast<enum streamType>(i));
     return ret;
   }
