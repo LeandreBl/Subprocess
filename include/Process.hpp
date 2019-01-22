@@ -22,6 +22,7 @@ namespace lp {
       void setCommand(const std::string &command) noexcept;
       void setWorkingDir(const std::string &pathName) noexcept;
       void setStreamTimeout(int timeout) noexcept;
+      void redirectStdin(bool does_redirect) noexcept;
       void redirectStdout(bool does_redirect) noexcept;
       void redirectStderr(bool does_redirect) noexcept;
       void onReadStdout(const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
