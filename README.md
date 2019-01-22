@@ -34,6 +34,7 @@ A little more tricky ?
   std::cout << "exit code: " << sp.getStatus() << std::endl;
 ```
 Ah, you wanted to simulate an user input into the subprocess ? alright !
+
 `Creation of a subprocess, where we redirect the standard input`
 ```cpp
   lp::Process sp("bash");
