@@ -26,17 +26,20 @@ namespace lp {
       void setCommand(const std::string &command) noexcept;
       void setWorkingDir(const std::string &pathName) noexcept;
       void redirect(enum streamType stream, bool does_redirect) noexcept;
-      void onReceive(enum streamType stream, const std::function<void (Process &process, std::istringstream &stream)> &callback) noexcept;
+      void onReceive(enum streamType stream, const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
       void toStdin(const std::string &string) noexcept;
       bool isRunning() noexcept;
       int start() noexcept; //voir si on throw pas un "command not found truc du genre" avec errno
       int wait() noexcept;
-      std::istringstream &getStream(enum streamType) noexcept;
+      std::stringstream &getStream(enum streamType) noexcept;
+      int getStatus() const noexcept;
+      bool isRedirecting(enum streamType stream) const noexcept;
+      bool isRedirecting(int fd) const noexcept;
     protected:
       std::string _cmd;
       std::string _workingDirectory;
-      std::istringstream _streams[2];
-      std::function<void (Process &process, std::istringstream &stream)> _callbacks[2];
+      std::stringstream _streams[2];
+      std::function<void (Process &process, std::stringstream &stream)> _callbacks[2];
       int _pipes[3][2];
       std::string _internalArgline;
       std::vector<char *> _parsedArgs;

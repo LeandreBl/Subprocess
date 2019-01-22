@@ -34,7 +34,7 @@ namespace lp {
     if (getPath(_parsedArgs[0], exePath) == -1)
       return (-1);
     for (uint8_t i = stdin; i <= stderr; ++i)
-      if (_redirect & (0b100 >> i) && 
+      if (isRedirecting(i) && 
           (pipe2(_pipes[i], O_CLOEXEC | O_NONBLOCK) == -1
           || close(_pipes[i][1]) == -1))
         return -1;
@@ -45,7 +45,7 @@ namespace lp {
     if (_pid != 0)
       return _pid == -1 ? -1 : 0;
     for (uint8_t i = stdin; i <= stderr; ++i) {
-      if (_redirect & (0b100 >> i) &&
+      if (isRedirecting(i) &&
           (dup2(_pipes[i][1], i) == -1
           || close(_pipes[i][0]) == -1))
         exit(EXIT_FAILURE);
