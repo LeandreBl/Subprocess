@@ -52,7 +52,8 @@ namespace lp {
       if (isRedirecting(i) && (dup2(_pipes[i][1], i) == -1 || close(_pipes[i][0]) == -1))
         exit(EXIT_FAILURE);
     }
-    chdir(_workingDirectory.c_str());
+    if (chdir(_workingDirectory.c_str()))
+      exit(EXIT_FAILURE);
     return execve(exePath.c_str(), _parsedArgs.data(), environ);
   }
 }
