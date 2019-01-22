@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "Process.hpp"
 
 namespace lp {
@@ -11,7 +13,7 @@ namespace lp {
   }
   void Process::onRead(enum streamType stream, const std::function<void(Process &process, std::stringstream &stream)> &callback) noexcept
   {
-    if (stream != Stdin)
-      _callbacks[stream - 1] = callback;
+    assert(stream != Stdin);
+    _callbacks[stream - 1] = callback;
   }
 }

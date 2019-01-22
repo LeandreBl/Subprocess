@@ -25,7 +25,7 @@ namespace lp {
     struct pollfd pfd;
 
     pfd.events = POLLIN;
-    pfd.fd = stream;
+    pfd.fd = _pipes[stream][0];
     if (poll(&pfd, 1, _pollTimeout) == 1 && fdToStream(_pipes[stream][0], _streams[stream - 1]) > 0)
       _callbacks[stream - 1](*this, _streams[stream - 1]);
   }
@@ -54,19 +54,28 @@ namespace lp {
     _status = WEXITSTATUS(status);
     _isRunning = false;
     _pid = -1;
-    if (pid == -1)
+    if (pid == -1) {
+      _status = EXIT_FAILURE;
       return -1;
+    }
     return _status;
   }
 
   int Process::wait() noexcept
   {
+    int ret;
+
     if (_callbacks[0] && _callbacks[1])
-      return waitAll();
+      ret = waitAll();
     else if (_callbacks[0])
-      return waitSingleStream(Stdout);
+      ret = waitSingleStream(Stdout);
     else if (_callbacks[1])
-      return waitSingleStream(Stderr);
-    return waitWithoutCallbacks();
+      ret = waitSingleStream(Stderr);
+    else
+      ret = waitWithoutCallbacks();
+    for (uint8_t i = Stdout; i <= Stderr; ++i)
+      if (isRedirecting(i))
+        pollStream(static_cast<enum streamType>(i));
+    return ret;
   }
 }

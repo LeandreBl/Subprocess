@@ -10,9 +10,6 @@
 # include <sstream>
 # include <memory>
 
-//toremove
-# include <iostream>
-
 namespace lp {
   
   class Process {
