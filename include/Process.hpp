@@ -24,7 +24,13 @@ namespace lp {
       void redirectStderr(bool does_redirect) noexcept;
       void onReadStdout(const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
       void onReadStderr(const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
-      ssize_t writeStdin(const std::string &string) noexcept;
+      ssize_t writeStdin(const std::string &string) const noexcept;
+      template <typename T>
+      ssize_t writeStdin(const T &data) const noexcept
+      {
+        return writeStdin(&data, sizeof(data));
+      }
+      ssize_t writeStdin(const void *data, size_t count) const noexcept;
       bool isRunning() noexcept;
       int start() noexcept; //voir si on throw pas un "command not found truc du genre" avec errno
       int wait() noexcept;
