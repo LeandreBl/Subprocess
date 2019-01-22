@@ -12,5 +12,6 @@ namespace lp {
       _parsedArgs.push_back(token);
       token = std::strtok(nullptr, " ");
     }
+    _parsedArgs.push_back(nullptr);
   }
 }

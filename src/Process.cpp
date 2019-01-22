@@ -2,7 +2,8 @@
 
 namespace lp {
   Process::Process(const std::string &command, const std::string &workingDirectory) noexcept
-  : _pid(-1), _status(EXIT_FAILURE), _isRunning(false), _redirect(false)
+  : _cmd(), _workingDirectory(), _internalArgline(), _parsedArgs(),
+    _pid(-1), _status(EXIT_FAILURE), _redirect(false), _pollTimeout(1000), _isRunning(false)
   {
     setWorkingDir(workingDirectory);
     setCommand(command);

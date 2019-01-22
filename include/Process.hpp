@@ -14,28 +14,40 @@
 # include <iostream>
 
 namespace lp {
+  
   class Process {
     public:
-      enum streamType {
-        stdin = 0,
-        stdout = 1,
-        stderr = 2,
-      };
       Process(const std::string &command = "", const std::string &workingDirectory = ".") noexcept;
       virtual ~Process() noexcept = default;
       void setCommand(const std::string &command) noexcept;
       void setWorkingDir(const std::string &pathName) noexcept;
-      void redirect(enum streamType stream, bool does_redirect) noexcept;
-      void onReceive(enum streamType stream, const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
-      void toStdin(const std::string &string) noexcept;
+      void setStreamTimeout(int timeout) noexcept;
+      void redirectStdout(bool does_redirect) noexcept;
+      void redirectStderr(bool does_redirect) noexcept;
+      void onReadStdout(const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
+      void onReadStderr(const std::function<void (Process &process, std::stringstream &stream)> &callback) noexcept;
+      ssize_t writeStdin(const std::string &string) noexcept;
       bool isRunning() noexcept;
       int start() noexcept; //voir si on throw pas un "command not found truc du genre" avec errno
       int wait() noexcept;
-      std::stringstream &getStream(enum streamType) noexcept;
+      std::stringstream &getStdout() noexcept;
+      std::stringstream &getStderr() noexcept;
       int getStatus() const noexcept;
-      bool isRedirecting(enum streamType stream) const noexcept;
-      bool isRedirecting(int fd) const noexcept;
     protected:
+      enum streamType {
+        Stdin = 0,
+        Stdout = 1,
+        Stderr = 2,
+      };
+      void pollStream(enum streamType stream) noexcept;
+      int waitSingleStream(enum streamType stream) noexcept;
+      int waitAll() noexcept;
+      int waitWithoutCallbacks() noexcept;
+      bool isRedirecting(enum streamType stream) const noexcept;
+      std::stringstream &getStream(enum streamType stream) noexcept;
+      void onRead(enum streamType stream, const std::function<void(Process &process, std::stringstream &stream)> &callback) noexcept;
+      void redirectStream(enum streamType stream, bool does_redirect) noexcept;
+      bool isRedirecting(int fd) const noexcept;
       std::string _cmd;
       std::string _workingDirectory;
       std::stringstream _streams[2];
@@ -45,8 +57,9 @@ namespace lp {
       std::vector<char *> _parsedArgs;
       pid_t _pid;
       int _status;
+      int _redirect;
+      int _pollTimeout;
       bool _isRunning : 1;
-      bool _redirect : 3;
   };
 }
 

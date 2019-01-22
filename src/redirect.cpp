@@ -1,11 +1,19 @@
 #include "Process.hpp"
 
 namespace lp {
-  void Process::redirect(enum streamType stream, bool does_redirect) noexcept
+  void Process::redirectStdout(bool does_redirect) noexcept
   {
-    if (does_redirect)
+    redirectStream(Stdout, does_redirect);
+  }
+  void Process::redirectStderr(bool does_redirect) noexcept
+  {
+    redirectStream(Stderr, does_redirect);
+  }
+  void Process::redirectStream(enum streamType stream, bool does_redirect) noexcept
+  {
+    if (does_redirect == true)
       _redirect |= (0b100 >> stream);
     else
       _redirect ^= (0b100 >> stream);
   }
-} // namespace lp
+}

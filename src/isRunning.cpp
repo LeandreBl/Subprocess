@@ -7,10 +7,13 @@ namespace lp {
       _isRunning = false;
       return false;
     }
-    pid_t pid = waitpid(_pid, &_status, WNOHANG);
+    int status;
+    pid_t pid = waitpid(_pid, &status, WNOHANG);
     _isRunning = (pid == 0 || pid == _pid);
-    if (_isRunning == false)
+    if (_isRunning == false) {
+      _status = WEXITSTATUS(status);
       _pid = -1;
+    }
     return _isRunning;
   }
 }
