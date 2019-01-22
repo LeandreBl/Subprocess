@@ -7,6 +7,6 @@ namespace lp {
   {
     if (isRedirecting(Stdin) == false)
       return -1;
-    return write(_pipes[Stdin][1], string.c_str(), string.size());
+    return write(_pipes[Stdin][0], string.c_str(), string.size());
   }
 } // namespace lp
