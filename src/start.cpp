@@ -14,15 +14,13 @@ namespace lp {
     const char *env = secure_getenv("PATH");
     if (env == nullptr)
       return (-1);
-    std::string renv(env);
-    char *token = std::strtok(const_cast<char *>(renv.c_str()), ":");
-    while (token != nullptr) {
-      fillPath = token;
+    std::istringstream stream(env);
+    while (stream) {
+      std::getline(stream, fillPath, ':');
       fillPath.push_back('/');
       fillPath += command;
       if (access(fillPath.c_str(), R_OK | X_OK) == 0)
         return (0);
-      token = std::strtok(nullptr, ":");
     }
     return -1;
   }
