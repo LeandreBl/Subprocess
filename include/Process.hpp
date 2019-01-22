@@ -31,6 +31,7 @@ namespace lp {
       std::stringstream &getStdout() noexcept;
       std::stringstream &getStderr() noexcept;
       int getStatus() const noexcept;
+      const std::string &getCommand() const noexcept;
     protected:
       enum streamType {
         Stdin = 0,
