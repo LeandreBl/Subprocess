@@ -10,9 +10,21 @@
 # include <sstream>
 # include <memory>
 
+#if defined (WIN32) && defined (BUILD_SHARED_LIBS)
+#if defined (_MSC_VER)
+#pragma warning(disable: 4251)
+#endif
+   #if defined(MyLib_EXPORT)
+     #define  MYLIB_EXPORT __declspec(dllexport)
+   #else
+     #define  MYLIB_EXPORT __declspec(dllimport)
+   #endif
+#else
+  #define MYLIB_EXPORT
+#endif
+
 namespace lp {
-  
-  class Process {
+  class MYLIB_EXPORT Process {
     public:
       Process(const std::string &command = "", const std::string &workingDirectory = ".") noexcept;
       virtual ~Process() noexcept = default;
