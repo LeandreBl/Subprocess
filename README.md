@@ -24,7 +24,7 @@ A little more tricky ?
   {
     std::cout << "subprocess: \"" << stream.str() << "\"" << std::endl;
     //here we can clear the stream from it's content for example
-    stream.str(std::string());
+    stream.str().clear();
   });
 
   sp.start();
