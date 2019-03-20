@@ -68,10 +68,13 @@ namespace lp {
       std::string _workingDirectory;
       std::stringstream _streams[2];
       std::function<void (Process &process, std::stringstream &stream)> _callbacks[2];
+#ifdef _WIN32
+#else
       int _pipes[3][2];
+      pid_t _pid;
+#endif
       std::string _internalArgline;
       std::vector<char *> _parsedArgs;
-      pid_t _pid;
       int _status;
       int _redirect;
       int _pollTimeout;

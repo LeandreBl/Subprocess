@@ -4,6 +4,10 @@
 
 #include "Process.hpp"
 
+#ifdef _WIN32
+static const DWORD MAX_ENV_LEN = 32767;
+#endif
+
 namespace lp {
   static int findFromPath(const char *command, const char *env, std::string &fillPath)
   {
@@ -24,12 +28,25 @@ namespace lp {
       fillPath = command;
       return 0;
     }
+#ifdef _WIN32
+    LPTSTR env = calloc(MAX_ENV_LEN);
+    if (env == nullptr)
+      return -1;
+    if (GetEnvironmentVariable("PATH", env, MAX_ENV_LEN) == 0)
+      return -1;
+#else
     const char *env = secure_getenv("PATH");
     if (env == nullptr)
       return -1;
-    return findFromPath(command, env, fillPath);
+#endif
+    int ret = findFromPath(command, env, fillPath);
+#ifdef _WIN32
+    free(env);
+#endif
+    return ret;
   }
 
+#ifndef _WIN32
   int Process::start() noexcept
   {
     std::string exePath;
@@ -57,3 +74,4 @@ namespace lp {
     return execve(exePath.c_str(), _parsedArgs.data(), environ);
   }
 }
+#endif

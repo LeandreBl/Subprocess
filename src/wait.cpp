@@ -4,7 +4,8 @@
 #include "Process.hpp"
 
 namespace lp {
-  ssize_t fdToStream(int fd, std::stringstream &stream)
+#ifndef _WIN32
+  static ssize_t fdToStream(int fd, std::stringstream &stream)
   {
     char buffer[4096];
     ssize_t rd;
@@ -29,6 +30,7 @@ namespace lp {
     if (poll(&pfd, 1, _pollTimeout) == 1 && fdToStream(_pipes[stream][0], _streams[stream - 1]) > 0)
       _callbacks[stream - 1](*this, _streams[stream - 1]);
   }
+#endif
 
   int Process::waitSingleStream(enum streamType stream) noexcept
   {
@@ -45,6 +47,7 @@ namespace lp {
     return _status;
   }
 
+#ifndef _WIN32
   int Process::waitWithoutCallbacks() noexcept
   {
     int status;
@@ -60,6 +63,7 @@ namespace lp {
     }
     return _status;
   }
+#endif
 
   int Process::wait() noexcept
   {

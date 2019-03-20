@@ -1,6 +1,7 @@
 #include "Process.hpp"
 
 namespace lp {
+#ifndef _WIN32
   bool Process::isRunning() noexcept
   {
     if (_pid == -1) {
@@ -16,4 +17,5 @@ namespace lp {
     }
     return _isRunning;
   }
+#endif
 }
