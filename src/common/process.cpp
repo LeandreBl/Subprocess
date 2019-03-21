@@ -3,7 +3,7 @@
 namespace lp {
   Process::Process(const std::string &command, const std::string &workingDirectory) noexcept
   : _cmd(), _workingDirectory(),
-#ifndef _WIN32
+#ifdef __linux__
     _pid(-1),
     _parsedArgs(),
     _internalArgline(), 
