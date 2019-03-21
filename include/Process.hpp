@@ -19,7 +19,7 @@ namespace lp {
   class Process {
     public:
       Process(const std::string &command = "", const std::string &workingDirectory = ".") noexcept;
-      virtual ~Process() noexcept = default;
+      ~Process() = default;
       void setCommand(const std::string &command) noexcept;
       void setWorkingDir(const std::string &pathName) noexcept;
       void setStreamTimeout(int timeout) noexcept;
