@@ -30,7 +30,7 @@ namespace lp {
 
     pfd.events = POLLIN;
     pfd.fd = _pipes[stream][0];
-    if (poll(&pfd, 1, _pollTimeout) == 1 && fdToStream(_pipes[stream][0], _streams[stream - 1]) > 0)
+    if (poll(&pfd, 1, _pollTimeout) == 1 && fdToStream(_pipes[stream][0], _streams[stream - 1]) > 0 && _callbacks[stream - 1])
       _callbacks[stream - 1](*this, _streams[stream - 1]);
   }
 
@@ -79,7 +79,7 @@ namespace lp {
     else
       ret = waitWithoutCallbacks();
     for (uint8_t i = Stdout; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)) && _callbacks[i - 1])
+      if (isRedirecting(static_cast<enum streamType>(i)))
         pollStream(static_cast<enum streamType>(i));
     return ret;
   }
