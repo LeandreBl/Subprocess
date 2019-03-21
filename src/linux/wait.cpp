@@ -56,6 +56,9 @@ namespace lp {
     pid_t pid;
 
     pid = waitpid(_pid, &status, 0);
+    for (uint8_t i = Stdout; i <= Stderr; ++i)
+      if (isRedirecting(static_cast<enum streamType>(i)))
+        pollStream(static_cast<streamType>(i));
     _status = WEXITSTATUS(status);
     _isRunning = false;
     _pid = -1;
@@ -78,9 +81,6 @@ namespace lp {
       ret = waitSingleStream(Stderr);
     else
       ret = waitWithoutCallbacks();
-    for (uint8_t i = Stdout; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)))
-        pollStream(static_cast<enum streamType>(i));
     return ret;
   }
 }

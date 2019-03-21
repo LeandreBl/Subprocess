@@ -15,7 +15,6 @@ namespace lp {
       if (!ReadFile(handle, buffer, sizeof(buffer), &rd, NULL))
         return -1;
       total += rd;
-      std::cout << rd << std::endl;
       ss.write(buffer, rd);
     } while (rd == sizeof(buffer));
     return total;
@@ -49,6 +48,10 @@ namespace lp {
   int Process::waitWithoutCallbacks() noexcept
   {
     DWORD status = WaitForSingleObject(_pi.hProcess, INFINITE);
+    for (uint8_t i = Stdout; i <= Stderr; ++i)
+      if (isRedirecting(static_cast<enum streamType>(i))) {
+        pollStream(static_cast<enum streamType>(i));
+      }
     BOOL ret = GetExitCodeProcess(_pi.hProcess, &_status);
     CloseHandle(_pi.hProcess);
     CloseHandle(_pi.hThread);
@@ -70,9 +73,6 @@ namespace lp {
       ret = waitSingleStream(Stderr);
     else
       ret = waitWithoutCallbacks();
-    for (uint8_t i = Stdout; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)))
-        pollStream(static_cast<enum streamType>(i));
     return ret;
   }
 }
