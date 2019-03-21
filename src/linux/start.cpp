@@ -8,7 +8,7 @@
 namespace lp {
   static int findFromPath(const char *command, const char *str, std::string &fillPath)
   {
-    std::istringstream stream(env);
+    std::istringstream stream(str);
     while (stream) {
       std::getline(stream, fillPath, ':');
       fillPath.push_back('/');
