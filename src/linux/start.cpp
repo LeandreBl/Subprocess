@@ -1,17 +1,11 @@
-#ifndef _WIN32
-# include <cstring>
-# include <unistd.h>
-# include <fcntl.h>
-#else
-#endif
+#ifdef __linux__
+#include <cstring>
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "Process.hpp"
 
-#ifdef _WIN32
-static const DWORD MAX_ENV_LEN = 32767;
-#endif
-
 namespace lp {
-#ifndef _WIN32
   static int findFromPath(const char *command, const char *str, std::string &fillPath)
   {
     std::istringstream stream(env);
@@ -38,39 +32,11 @@ namespace lp {
     return ret;
     return 0;
   }
-#endif
 
   int Process::start() noexcept
   {
     if (_isRunning == true)
       return -1;
-#ifdef _WIN32
-    ZeroMemory(&_si, sizeof(_si));
-    _si.cb = sizeof(_si);
-    ZeroMemory(&_pi, sizeof(_pi));
-    _saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    _saAttr.bInheritHandle = TRUE; 
-    _saAttr.lpSecurityDescriptor = NULL; 
-    for (uint8_t i = Stdin; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)) && !CreatePipe(&_pipes[i][0], &_pipes[i][1], &_saAttr, 0))
-        return -1;
-    if (isRedirecting(Stdin))
-      std::swap(_pipes[Stdin][0], _pipes[Stdin][1]);
-    for (uint8_t i = Stdin; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)) && !SetHandleInformation(_pipes[i][0], HANDLE_FLAG_INHERIT, 0))
-        return -1;
-    if (isRedirecting(Stdin))
-      _si.hStdInput = _pipes[Stdin][1];
-    if (isRedirecting(Stdout))
-      _si.hStdOutput = _pipes[Stdout][1];
-    if (isRedirecting(Stderr))
-      _si.hStdError = _pipes[Stderr][1];
-    _si.dwFlags |= STARTF_USESTDHANDLES;
-    if (!CreateProcess(NULL, const_cast<LPSTR>(_cmd.c_str()),  NULL, NULL, FALSE, 0, NULL, _workingDirectory.c_str(), &_si, &_pi))
-      return -1;
-    _isRunning = true;
-    return 0;
-#else
     std::string exePath;
 
     if (getPath(_parsedArgs[0], exePath) == -1)
@@ -96,6 +62,6 @@ namespace lp {
     int ret = execve(exePath.c_str(), _parsedArgs.data(), environ);
     _isRunning = !ret;
     return ret;      
-#endif
   }
 }
+#endif

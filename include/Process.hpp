@@ -1,13 +1,14 @@
 #ifndef _LIBPROCESSPLUSPLUS_HPP_
 # define _LIBPROCESSPLUSPLUS_HPP_
 
-#ifndef _WIN32
-# include <sys/wait.h>
-# include <sys/cdefs.h>
-#else
+#ifdef _WIN32
 # include <Windows.h>
 typedef long int ssize_t;
+#else
+# include <sys/wait.h>
+# include <sys/cdefs.h>
 #endif
+
 # include <string>
 # include <vector>
 # include <functional>
@@ -60,6 +61,7 @@ namespace lp {
       std::stringstream _streams[2];
       std::function<void (Process &process, std::stringstream &stream)> _callbacks[2];
 #ifdef _WIN32
+      void resetProcessInfos() noexcept;
       STARTUPINFO _si;
       PROCESS_INFORMATION _pi;
       SECURITY_ATTRIBUTES _saAttr;

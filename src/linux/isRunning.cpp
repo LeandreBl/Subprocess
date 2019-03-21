@@ -1,20 +1,9 @@
+#ifdef __linux__
 #include "Process.hpp"
 
 namespace lp {
   bool Process::isRunning() noexcept
   {
-#ifdef _WIN32
-    if (_isRunning == false)
-      return false;
-    DWORD status = WaitForSingleObject(_pi.hProcess, 1);
-    _isRunning = !(status == WAIT_OBJECT_0);
-    if (_isRunning == false) {
-      GetExitCodeProcess(_pi.hProcess, &_status);
-      CloseHandle(_pi.hProcess);
-      CloseHandle(_pi.hThread);
-    }
-    return _isRunning;
-#else
     if (_pid == -1) {
       _isRunning = false;
       return false;
@@ -27,6 +16,6 @@ namespace lp {
       _pid = -1;
     }
     return _isRunning;
-#endif
   }
 }
+#endif
