@@ -1,7 +1,9 @@
-#include <cstring>
-#include <fcntl.h>
-#include <unistd.h>
-
+#ifndef _WIN32
+# include <cstring>
+# include <unistd.h>
+# include <fcntl.h>
+#else
+#endif
 #include "Process.hpp"
 
 #ifdef _WIN32
@@ -9,7 +11,8 @@ static const DWORD MAX_ENV_LEN = 32767;
 #endif
 
 namespace lp {
-  static int findFromPath(const char *command, const char *env, std::string &fillPath)
+#ifndef _WIN32
+  static int findFromPath(const char *command, const char *str, std::string &fillPath)
   {
     std::istringstream stream(env);
     while (stream) {
@@ -28,27 +31,46 @@ namespace lp {
       fillPath = command;
       return 0;
     }
-#ifdef _WIN32
-    LPTSTR env = calloc(MAX_ENV_LEN);
-    if (env == nullptr)
-      return -1;
-    if (GetEnvironmentVariable("PATH", env, MAX_ENV_LEN) == 0)
-      return -1;
-#else
     const char *env = secure_getenv("PATH");
     if (env == nullptr)
       return -1;
-#endif
     int ret = findFromPath(command, env, fillPath);
-#ifdef _WIN32
-    free(env);
-#endif
     return ret;
+    return 0;
   }
+#endif
 
-#ifndef _WIN32
   int Process::start() noexcept
   {
+    if (_isRunning == true)
+      return -1;
+#ifdef _WIN32
+    ZeroMemory(&_si, sizeof(_si));
+    _si.cb = sizeof(_si);
+    ZeroMemory(&_pi, sizeof(_pi));
+    _saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    _saAttr.bInheritHandle = TRUE; 
+    _saAttr.lpSecurityDescriptor = NULL; 
+    for (uint8_t i = Stdin; i <= Stderr; ++i)
+      if (isRedirecting(static_cast<enum streamType>(i)) && !CreatePipe(&_pipes[i][0], &_pipes[i][1], &_saAttr, 0))
+        return -1;
+    if (isRedirecting(Stdin))
+      std::swap(_pipes[Stdin][0], _pipes[Stdin][1]);
+    for (uint8_t i = Stdin; i <= Stderr; ++i)
+      if (isRedirecting(static_cast<enum streamType>(i)) && !SetHandleInformation(_pipes[i][0], HANDLE_FLAG_INHERIT, 0))
+        return -1;
+    if (isRedirecting(Stdin))
+      _si.hStdInput = _pipes[Stdin][1];
+    if (isRedirecting(Stdout))
+      _si.hStdOutput = _pipes[Stdout][1];
+    if (isRedirecting(Stderr))
+      _si.hStdError = _pipes[Stderr][1];
+    _si.dwFlags |= STARTF_USESTDHANDLES;
+    if (!CreateProcess(NULL, const_cast<LPSTR>(_cmd.c_str()),  NULL, NULL, FALSE, 0, NULL, _workingDirectory.c_str(), &_si, &_pi))
+      return -1;
+    _isRunning = true;
+    return 0;
+#else
     std::string exePath;
 
     if (getPath(_parsedArgs[0], exePath) == -1)
@@ -71,7 +93,9 @@ namespace lp {
     }
     if (chdir(_workingDirectory.c_str()))
       exit(EXIT_FAILURE);
-    return execve(exePath.c_str(), _parsedArgs.data(), environ);
+    int ret = execve(exePath.c_str(), _parsedArgs.data(), environ);
+    _isRunning = !ret;
+    return ret;      
+#endif
   }
 }
-#endif

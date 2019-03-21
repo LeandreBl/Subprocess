@@ -15,6 +15,8 @@ set(LIB_NAME "process++")
 if (UNIX)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -Wextra -Weffc++ -Wshadow -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wpedantic -Wsign-conversion -Wlogical-op -Wuseless-cast")
 set(CMAKE_CXX_FLAGS_DEBUG "-O3 -g3 -Wall -Wextra -Wpedantic")
+else (WIN32)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 endif (UNIX)
 
 ## Sources

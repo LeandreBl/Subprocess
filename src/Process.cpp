@@ -2,9 +2,11 @@
 
 namespace lp {
   Process::Process(const std::string &command, const std::string &workingDirectory) noexcept
-  : _cmd(), _workingDirectory(), _internalArgline(), _parsedArgs(),
-#ifndef __WIN32
+  : _cmd(), _workingDirectory(),
+#ifndef _WIN32
     _pid(-1),
+    _parsedArgs(),
+    _internalArgline(), 
 #endif
     _status(EXIT_FAILURE), _redirect(false), _pollTimeout(10), _isRunning(false)
   {

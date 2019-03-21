@@ -1,30 +1,21 @@
 #ifndef _LIBPROCESSPLUSPLUS_HPP_
 # define _LIBPROCESSPLUSPLUS_HPP_
 
+#ifndef _WIN32
 # include <sys/wait.h>
 # include <sys/cdefs.h>
-
+#else
+# include <Windows.h>
+typedef long int ssize_t;
+#endif
 # include <string>
 # include <vector>
 # include <functional>
 # include <sstream>
 # include <memory>
 
-#if defined (WIN32) && defined (BUILD_SHARED_LIBS)
-#if defined (_MSC_VER)
-#pragma warning(disable: 4251)
-#endif
-   #if defined(MyLib_EXPORT)
-     #define  MYLIB_EXPORT __declspec(dllexport)
-   #else
-     #define  MYLIB_EXPORT __declspec(dllimport)
-   #endif
-#else
-  #define MYLIB_EXPORT
-#endif
-
 namespace lp {
-  class MYLIB_EXPORT Process {
+  class Process {
     public:
       Process(const std::string &command = "", const std::string &workingDirectory = ".") noexcept;
       virtual ~Process() noexcept = default;
@@ -69,13 +60,18 @@ namespace lp {
       std::stringstream _streams[2];
       std::function<void (Process &process, std::stringstream &stream)> _callbacks[2];
 #ifdef _WIN32
+      STARTUPINFO _si;
+      PROCESS_INFORMATION _pi;
+      SECURITY_ATTRIBUTES _saAttr;
+      DWORD _status;
+      HANDLE _pipes[3][2];
 #else
       int _pipes[3][2];
       pid_t _pid;
-#endif
-      std::string _internalArgline;
       std::vector<char *> _parsedArgs;
+      std::string _internalArgline;
       int _status;
+#endif
       int _redirect;
       int _pollTimeout;
       bool _isRunning : 1;

@@ -1,6 +1,9 @@
-#include <unistd.h>
-#include <sys/poll.h>
+#ifndef _WIN32
+# include <unistd.h>
+# include <sys/poll.h>
+#endif
 
+#include <iostream>
 #include "Process.hpp"
 
 namespace lp {
@@ -21,21 +24,44 @@ namespace lp {
     return total;
   }
 
+#endif
+  static ssize_t handleToStream(HANDLE handle, std::stringstream &ss)
+  {
+    char buffer[4096];
+    DWORD rd;
+    ssize_t total = 0;
+
+    do {
+      if (!ReadFile(handle, buffer, sizeof(buffer), &rd, NULL))
+        return -1;
+      total += rd;
+      std::cout << rd << std::endl;
+      ss.write(buffer, rd);
+    } while (rd == sizeof(buffer));
+    return total;
+  }
+
   void Process::pollStream(enum streamType stream) noexcept
   {
+#ifdef _WIN32
+    DWORD status = WaitForSingleObject(_pipes[stream][0], _pollTimeout);
+    if (status == WAIT_OBJECT_0 && handleToStream(_pipes[stream][0], _streams[stream - 1]) > 0)
+#else
     struct pollfd pfd;
 
     pfd.events = POLLIN;
     pfd.fd = _pipes[stream][0];
     if (poll(&pfd, 1, _pollTimeout) == 1 && fdToStream(_pipes[stream][0], _streams[stream - 1]) > 0)
+#endif
       _callbacks[stream - 1](*this, _streams[stream - 1]);
   }
-#endif
 
   int Process::waitSingleStream(enum streamType stream) noexcept
   {
-    while (isRunning())
+    while (isRunning()) {
+      std::cout << "wait..." << std::endl;
       pollStream(stream);
+    }
     return _status;
   }
 
@@ -47,9 +73,18 @@ namespace lp {
     return _status;
   }
 
-#ifndef _WIN32
   int Process::waitWithoutCallbacks() noexcept
   {
+#ifdef _WIN32
+    DWORD status = WaitForSingleObject(_pi.hProcess, INFINITE);
+    BOOL ret = GetExitCodeProcess(_pi.hProcess, &_status);
+    CloseHandle(_pi.hProcess);
+    CloseHandle(_pi.hThread);
+    _isRunning = false;
+    if (ret == false)
+      return -1;
+    return _status;
+#else
     int status;
     pid_t pid;
 
@@ -62,8 +97,9 @@ namespace lp {
       return -1;
     }
     return _status;
-  }
 #endif
+    return 0;
+  }
 
   int Process::wait() noexcept
   {
@@ -78,8 +114,8 @@ namespace lp {
     else
       ret = waitWithoutCallbacks();
     for (uint8_t i = Stdout; i <= Stderr; ++i)
-      if (isRedirecting(static_cast<enum streamType>(i)) && _callbacks[i - 1])
-        pollStream(static_cast<enum streamType>(i));
+      if (isRedirecting(static_cast<enum streamType>(i)) && WaitForSingleObject(_pi.hProcess, 10) == 0)
+        handleToStream(_pipes[i][0], _streams[i - 1]);
     return ret;
   }
 }

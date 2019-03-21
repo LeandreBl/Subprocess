@@ -6,6 +6,7 @@ namespace lp {
   void Process::setCommand(const std::string &command) noexcept
   {
     _cmd = command;
+#ifndef _WIN32
     _internalArgline = command;
     char *token = std::strtok(const_cast<char *>(_internalArgline.c_str()), " ");
     while (token != nullptr) {
@@ -13,5 +14,6 @@ namespace lp {
       token = std::strtok(nullptr, " ");
     }
     _parsedArgs.push_back(nullptr);
+#endif
   }
 }
