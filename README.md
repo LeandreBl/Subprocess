@@ -1,5 +1,5 @@
 # Subprocess
-A quick subprocess implementation in C++
+An asynchronous and synchronous subprocess implementation in C++
 
 `Creation of a simple subprocess, where we want to redirect the standard output`
 ```cpp
