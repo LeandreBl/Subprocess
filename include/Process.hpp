@@ -18,25 +18,33 @@ namespace lp {
 class Process {
 public:
   Process(const std::string &command = "", const std::string &workingDirectory = ".") noexcept;
+
   void setCommand(const std::string &command) noexcept;
   void setWorkingDir(const std::string &pathName) noexcept;
   void setStreamTimeout(int timeout) noexcept;
+
   void redirectStdin(bool does_redirect) noexcept;
   void redirectStdout(bool does_redirect) noexcept;
   void redirectStderr(bool does_redirect) noexcept;
+
   void onReadStdout(const std::function<void(Process &process, std::stringstream &stream)>
                             &callback) noexcept;
   void onReadStderr(const std::function<void(Process &process, std::stringstream &stream)>
                             &callback) noexcept;
+
   int64_t writeStdin(const std::string &string) const noexcept;
   template <typename T> int64_t writeStdin(const T &data) const noexcept
   {
     return writeStdin(&data, sizeof(data));
   }
   int64_t writeStdin(const void *data, size_t count) const noexcept;
+
   bool isRunning() noexcept;
+
   int start() noexcept; // voir si on throw pas un "command not found truc du genre" avec errno
+
   int wait() noexcept;
+
   std::stringstream &getStdout() noexcept;
   std::stringstream &getStderr() noexcept;
   int getStatus() const noexcept;
