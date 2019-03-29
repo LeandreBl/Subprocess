@@ -2,8 +2,8 @@
 
 
 namespace lp {
-  const std::string &Process::getCommand() const noexcept
-  {
-    return _cmd;
-  }
+const std::string &Process::getCommand() const noexcept
+{
+  return _cmd;
 }
+} // namespace lp

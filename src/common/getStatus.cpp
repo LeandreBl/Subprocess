@@ -2,8 +2,8 @@
 
 
 namespace lp {
-  int Process::getStatus() const noexcept
-  {
-    return _status;
-  }
+int Process::getStatus() const noexcept
+{
+  return _status;
 }
+} // namespace lp

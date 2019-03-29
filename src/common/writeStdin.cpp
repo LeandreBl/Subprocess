@@ -3,8 +3,8 @@
 #include "Process.hpp"
 
 namespace lp {
-  ssize_t Process::writeStdin(const std::string &string) const noexcept
-  {
-    return writeStdin(string.c_str(), string.size());
-  }
+int64_t Process::writeStdin(const std::string &string) const noexcept
+{
+  return writeStdin(string.c_str(), string.size());
+}
 } // namespace lp

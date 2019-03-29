@@ -1,12 +1,12 @@
 #ifdef _WIN32
-#include <cstring>
+#  include <cstring>
 
-#include "Process.hpp"
+#  include "Process.hpp"
 
 namespace lp {
-  void Process::setCommand(const std::string &command) noexcept
-  {
-    _cmd = command;
-  }
+void Process::setCommand(const std::string &command) noexcept
+{
+  _cmd = command;
 }
+} // namespace lp
 #endif
